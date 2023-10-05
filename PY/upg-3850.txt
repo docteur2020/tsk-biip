@@ -1,0 +1,8 @@
+WNORM5-SYNC-BX-2 
+Mode Bundle
+WNORM6-SYNC-BX   OK
+WEST11-SYNC-BX   OK 
+WEST11-SYNC-BX-2 
+
+
+request platform software package install switch all file flash:cat3k_caa-universalk9.16.12.07.SPA.bin auto-copy

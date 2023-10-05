@@ -1,0 +1,36 @@
+  conf t
+    ip prefix-list PL-DENYALL seq 5 deny 0.0.0.0/0 le 32
+    no ip prefix-list PL-BNP-NP-PREPROD-TO-ACDC seq 5 deny 0.0.0.0/0 le 32
+    ip prefix-list PL-BNP-NP-PREPROD-TO-ACDC permit 10.10.17.32/28
+end
+    
+    
+./upload-nxos-9.3.9-CSCwe09300.tcl REST11-PREPROD-SP01        &
+./upload-nxos-9.3.9-CSCwe09300.tcl REST12-PREPROD-BL06X       &
+./upload-nxos-9.3.9-CSCwe09300.tcl REST12-PREPROD-BL06Y       &
+./upload-nxos-9.3.9-CSCwe09300.tcl REST12-PREPROD-AL05X       &
+./upload-nxos-9.3.9-CSCwe09300.tcl REST12-PREPROD-AL05Y       &
+./upload-nxos-9.3.9-CSCwe09300.tcl REST11-PREPROD-AL04X       &
+./upload-nxos-9.3.9-CSCwe09300.tcl REST11-PREPROD-AL04Y       &
+./upload-nxos-9.3.9-CSCwe09300.tcl RNORM5-PREPROD-SP01        &
+./upload-nxos-9.3.9-CSCwe09300.tcl RNORM4-PREPROD-SP01        &
+./upload-nxos-9.3.9-CSCwe09300.tcl RNORM5-PREPROD-BL01X       &
+./upload-nxos-9.3.9-CSCwe09300.tcl RNORM5-PREPROD-BL01Y       &
+./upload-nxos-9.3.9-CSCwe09300.tcl RNORM4-PREPROD-AL02X       &
+./upload-nxos-9.3.9-CSCwe09300.tcl RNORM4-PREPROD-AL02Y       &
+./upload-nxos-9.3.9-CSCwe09300.tcl RSUDM1-PREPROD-AL03Y       &
+./upload-nxos-9.3.9-CSCwe09300.tcl RSUDM1-PREPROD-AL03X       &
+./upload-nxos-9.3.9-CSCwe09300.tcl REST12-PREPROD-SP01        &
+
+conf t
+interface vlan 521
+ no shut
+end
+
+install add bootflash:////nxos.CSCwe09300-n9k_ALL-1.0.0-9.3.9.lib32_n9000.rpm activate 
+install commit
+
+conf t
+interface vlan 521
+ shut
+end

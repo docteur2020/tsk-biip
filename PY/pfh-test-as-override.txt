@@ -1,0 +1,192 @@
+RVAL3-7K2-DFI-A
+
+
+vrf context TMP-TSK-1
+ 
+interface loo 789
+   vrf member TMP-TSK-1
+   ip address 7.7.7.7 255.255.255.255
+   no shut
+   
+interface Ethernet2/1.789
+  encapsulation dot1q 789
+  vrf member TMP-TSK-1
+  ip address 14.0.1.1/30 
+  no shut
+  
+router bgp 64446.52944
+ vrf TMP-TSK-1
+     neighbor 14.0.1.2
+      remote-as 64562
+       address-family ipv4 unicast
+        send-community both
+
+  
+RVAL3-7K2-INTRA
+  
+  
+vrf context TMP-TSK-2
+  
+interface Ethernet2/19.789
+  encapsulation dot1q 789
+  vrf member TMP-TSK-2
+  ip address 14.0.1.2/30 
+  no shut
+ 
+ 
+vrf context TMP-TSK-2
+  
+interface Ethernet2/23.789
+  encapsulation dot1q 789
+  vrf member TMP-TSK-2
+  ip address 14.0.2.1/30 
+  no shut
+ 
+ router bgp 64562
+ vrf TMP-TSK-2
+     neighbor 14.0.1.1
+      remote-as 64446.52944
+ address-family ipv4 unicast
+        send-community both
+      neighbor 14.0.2.2
+       remote-as 64564
+               address-family ipv4 unicast
+        send-community both
+      
+RVAL3-7K2-INTER
+  
+vrf context TMP-TSK-3
+  
+interface Ethernet2/38.789
+  encapsulation dot1q 789
+  vrf member TMP-TSK-3
+  ip address 14.0.2.2/30 
+  no shut
+ 
+ 
+vrf context TMP-TSK-3
+  
+interface Ethernet2/42.789
+  encapsulation dot1q 789
+  vrf member TMP-TSK-3
+  ip address 14.0.3.1/30 
+  no shut
+  
+  
+ router bgp 64564
+ vrf TMP-TSK-3
+     neighbor 14.0.2.1
+      remote-as 64562
+ address-family ipv4 unicast
+        send-community both
+      neighbor 14.0.3.2
+       remote-as 100
+               address-family ipv4 unicast
+        send-community both
+      
+  
+RVAL3-ASR9K-ACDC-1
+
+Tue Jun 20 08:29:30.657 UTC
+
+vrf TMP-TSK-4
+ address-family ipv4 unicast
+  import route-target
+  789:13
+  !
+  export route-target
+   789:13
+
+
+interface Ten0/0/0/17.789
+ vrf TMP-TSK-4
+ ipv4 address 14.0.3.2 255.255.255.252
+ encapsulation dot1q 789
+ no shut
+!
+
+
+interface Ten0/0/0/18.789
+ vrf TMP-TSK-4
+ ipv4 address 14.0.4.1 255.255.255.252
+ encapsulation dot1q 789
+ no shut
+!
+router bgp 100
+  vrf TMP-TSK-4
+  rd 789:100
+  address-family ipv4 unicast
+   neighbor 14.0.3.1
+   remote-as 64564
+   address-family ipv4 unicast
+    route-policy pass-all in
+    route-policy pass-all out
+    neighbor 14.0.4.2
+   remote-as 777
+   address-family ipv4 unicast
+    route-policy pass-all in
+    route-policy pass-all out
+   !
+   !
+ 
+
+
+RVAL3-7K1-INTRA
+
+vrf context TMP-TSK-5
+
+interface Ethernet2/30.789
+  encapsulation dot1q 789
+  vrf member TMP-TSK-5
+  ip address 14.0.4.2/30 
+  no shut
+
+
+interface Ethernet2/20.789
+  encapsulation dot1q 789
+  vrf member TMP-TSK-5
+  ip address 14.0.5.1/30 
+  no shut
+
+
+ router bgp 64562
+ vrf TMP-TSK-5
+     local-as 777
+     neighbor 14.0.4.1
+      remote-as 100
+      address-family ipv4 unicast
+         send-community both
+      neighbor 14.0.5.2
+       remote-as 900
+       address-family ipv4 unicast
+        send-community both
+      
+      
+      
+RVAL3-7K3-DFI-A
+  
+vrf context TMP-TSK-6
+
+interface loo 789
+     vrf member TMP-TSK-6
+   ip address 14.14.14.14 255.255.255.255
+   no shut
+   
+interface Ethernet2/2.789
+  encapsulation dot1q 789
+  vrf member TMP-TSK-6
+  ip address 14.0.5.2/30 
+  no shut
+
+
+ router bgp 64446.52944
+ vrf TMP-TSK-6
+     local-as 64564
+     address-family ipv4 unicast
+     network 14.14.14.14 mask 255.255.255.255
+     neighbor 14.0.5.1
+      remote-as 777
+
+       address-family ipv4 unicast
+        send-community both
+

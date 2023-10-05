@@ -1,0 +1,33 @@
+RFRA-ACDC-PE1 /  RMUN-ACDC-PE1 
+
+RP/0/RP0/CPU0:RFRA-ACDC-PE1#show md5 file /misc/disk1/asr9k-goldenk9-x64-7.5.2-ASR9K752.iso  
+Fri Jun 30 00:21:16.205 CEST
+0ce54d04787a9442a511e1a585c3bb2d
+
+ py/connexion.py -l RFRA-ACDC-PE1:RMUN-ACDC-PE1 -C #sh bgp vrf all summary -r OUTPUT/CHG0503074/BGP_SUM/BEF -t 80
+ py/connexion.py -l RFRA-ACDC-PE1:RMUN-ACDC-PE1 -C "sh bgp vrf all summary" -r OUTPUT/CHG0503074/BGP_SUM/BEF -t 80
+ py/connexion.py -l RFRA-ACDC-PE1:RMUN-ACDC-PE1 -C "sh bgp vpnv4 unicast summary" -r OUTPUT/CHG0503074/BGP_VPNV4_SUM/BEF -t 80
+ 
+ 
+ py/connexion.py -f LIST/ACDC-ALL.TXT -a GETALLROUTE -r OUTPUT/CHG0503074/ROUTE/BEF -t 500
+py/connexion.py -f LIST/ACDC-ALL.TXT -C 'sh lldp neighbor' -r OUTPUT/CHG0503074/LLDP/BEF -t 500
+py/connexion.py -f LIST/ACDC-ALL.TXT -a CDPDETAIL -r OUTPUT/CHG0503074/CDP/BEF -t 500
+
+
+py/connexion.py -l RFRA-ACDC-PE1:RMUN-ACDC-PE1 -a RUN -r OUTPUT/CHG0503074/RUN/AFT_FR -t 80
+
+
+py/connexion.py -l RFRA-ACDC-PE1:RMUN-ACDC-PE1 -a RUN -r OUTPUT/CHG0503074/RUN/AFT_FR_2 -t 80
+
+
+py/connexion.py -l RFRA-ACDC-PE1:RMUN-ACDC-PE1 -a RUN -r OUTPUT/CHG0503074/RUN/AFT -t 80
+
+py/connexion.py -l RFRA-ACDC-PE1:RMUN-ACDC-PE1 -a STATUS -r OUTPUT/CHG0503074/STATUS/AFT -t 80
+
+
+ py/connexion.py -l RFRA-ACDC-PE1:RMUN-ACDC-PE1 -C "sh bgp vrf all summary" -r OUTPUT/CHG0503074/BGP_SUM/AFT -t 80
+ py/connexion.py -l RFRA-ACDC-PE1:RMUN-ACDC-PE1 -C "sh bgp vpnv4 unicast summary" -r OUTPUT/CHG0503074/BGP_VPNV4_SUM/AFT -t 80
+ 
+ 
+ py/connexion.py -f LIST/ACDC-ALL.TXT -C 'sh lldp neighbor' -r OUTPUT/CHG0503074/LLDP/AFT -t 500
+py/connexion.py -f LIST/ACDC-ALL.TXT -a CDPDETAIL -r OUTPUT/CHG0503074/CDP/AFT -t 500

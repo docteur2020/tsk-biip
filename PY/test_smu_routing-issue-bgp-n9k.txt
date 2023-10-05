@@ -1,0 +1,3 @@
+sh interface status up | count
+sh ip route vrf all summary | diff
+sh ip bgp vrf all summary | i '[0-9]\s+$' | cou

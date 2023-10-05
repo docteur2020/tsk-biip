@@ -1,0 +1,10 @@
+   Network            Next Hop            Metric     LocPrf     Weight Path
+*>e7.7.7.7/32         14.0.5.1                                       0 777 100 777 64562 64446.52944 i
+
+
+   Network            Next Hop            Metric     LocPrf     Weight Path
+*>e7.7.7.7/32         14.0.5.1                                       0 777 100 64564 64562 64446.52944 i
+*>l14.14.14.14/32     0.0.0.0                           100      32768 i
+
+
+
