@@ -1,0 +1,19 @@
+{% for interface in interfaces %}
+interface {{interface.name}}
+  description SUP1_==>{{interface.description|replace(' ','_')|replace('_to_','')}}
+  mtu 9100
+  no switchport 
+  ip address {{interface.ip}}
+  bfd echo
+  isis enable UNDERLAY
+  isis network point-to-point
+  isis authentication mode md5  
+  isis authentication key 7 MvSDD62uq0WnsjMD2gi1Ww==
+!
+{%- endfor %}
+
+router bgp {{bgp.as}}
+   {% for neighbor in neighbors %}
+    neighbor {{neighbor.ip}} peer group RR_CLIENT_EVPN
+  {%- endfor %}
+!
