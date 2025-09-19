@@ -1,0 +1,43 @@
+
+
+
+
+
+{% for interface in interfaces %}
+interface {{interface.name}}
+  no switchport
+  description {{interface.description}}
+  mtu 9100
+  bfd interval 300 min_rx 300 multiplier 3
+  bfd authentication Keyed-SHA1 key-id 1 hex-key 62662D6B6579
+  no ip redirects
+  ip address {{interface.ip}}
+  isis network point-to-point
+  isis authentication-type md5
+  isis authentication key-chain IS-IS_KC
+  ip router isis UNDERLAY
+  no shutdown
+{%- endfor %}
+
+
+
+router bgp {{bgp.as}}
+  {% for neighbor in neighbors %}
+   {% if neighbor.type == "leaf" -%}
+  neighbor {{neighbor.ip}}
+    inherit peer EVPN-RR-CLIENT
+    description RR-client-leaf-{{neighbor.hostname}}
+	{%- else %}
+  neighbor {{neighbor.ip}}
+    inherit peer EVPN-RR-CLIENT
+    description {{neighbor.hostname}}
+   {%- endif %}
+  {%- endfor %}
+ 
+
+
+
+  
+
+  
+
