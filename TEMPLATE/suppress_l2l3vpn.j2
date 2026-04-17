@@ -1,0 +1,33 @@
+
+! {{hostname}}
+
+
+
+
+
+
+
+interface nve1
+{% for vlan in l2 %}
+   no member vni {{vlan|l2vnid}} 
+{%- endfor %}
+
+
+
+
+evpn
+ {% for vlan in l2 %}
+  no vni {{vlan|l2vnid}} l2
+ {%- endfor %}
+
+
+
+
+
+
+
+{% for vlan in l2 %}
+no vlan {{vlan}}
+
+{%- endfor %}
+

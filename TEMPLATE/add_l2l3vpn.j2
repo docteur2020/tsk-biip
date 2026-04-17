@@ -1,0 +1,166 @@
+
+! {{hostname}}
+
+
+! {{type}}
+
+{% if type == "ACCESS" -%}
+{% for vlan in access %}
+vlan {{vlan.vlanid}}
+ {%- if vlan.description %} 
+ name {{vlan.description}}  
+ vn-segment {{vlan.vlanid|l2vnid}} 
+ {%- endif %}
+{%- endfor %}
+{%- endif %}
+
+{% if type == "BORDER" -%}
+{% for vlan in borders %}
+vlan {{vlan.vlanid}}
+  {% if vlan.description %} name  {{vlan.description}}  {%- endif %}
+   vn-segment {{vlan.vlanid|l2vnid}} 
+{%- endfor %}
+{%- endif %}
+
+
+{% for vrf in vrfs %} 
+vrf context {{vrf.name}}
+ vni {{vrf.vrfid|l3vnid}}
+ rd {{routerid}}:{{vrf.vrfid|l3vnid}}
+ address-family ipv4 unicast
+  route-target import {{bgpas}}:{{vrf.vrfid|l3vnid}}
+  route-target import {{bgpas}}:{{vrf.vrfid|l3vnid}} evpn
+  route-target export {{bgpas}}:{{vrf.vrfid|l3vnid}}
+  route-target export {{bgpas}}:{{vrf.vrfid|l3vnid}} evpn
+{%- endfor %}
+
+{% for vrf in vrfs %} 
+vlan {{vrf.vrfid|vlanvrf}}
+ vn-segment {{vrf.vrfid|l3vnid}}
+{%- endfor %}
+
+{% for vrf in vrfs %}
+interface Vlan{{vrf.vrfid|vlanvrf}}
+ description {{vrf.name}}-L3VNI
+ vrf member {{vrf.name}}
+   mtu 9100
+  no ip redirects
+  ip forward
+  no ipv6 redirects
+  no shut
+{%- endfor %}
+
+{% if type == "ACCESS" -%}
+{% for svi in servers %}
+{%- if svi.vrf %}
+interface Vlan{{svi.vlanid}}
+ no shut
+ mtu 9000
+{% if svi.description %} description {{svi.description}} {%- endif %}
+
+  vrf member {{svi.vrf}}
+  ip address {{svi.address}}
+  no ip redirects
+  no ipv6 redirects
+  fabric forwarding mode anycast-gateway
+
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+
+{% if type == "BORDER" -%}
+{% for svi in svis %}
+{%- if svi.vrf %}
+interface Vlan{{svi.vlanid}}
+ no shut
+ mtu 9000
+{% if svi.description %} description {{svi.description}} {%- endif %}
+  vrf member {{svi.vrf}}
+  ip address {{svi.address}}
+  no ip redirects
+  no ipv6 redirects
+  fabric forwarding mode anycast-gateway
+
+
+
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+
+
+interface nve1
+{% if type == "ACCESS" -%}
+{% for vlan in access %}
+   member vni {{vlan.vlanid|l2vnid}} 
+{%- endfor %}
+{%- endif %}
+{% if type == "BORDER" -%}
+{% for vlan in borders %}
+   member vni {{vlan.vlanid|l2vnid}} 
+{%- endfor %}
+{%- endif %}
+{% for vrf in vrfs %} 
+  member vni {{vrf.vrfid|l3vnid}} associate-vrf
+{%- endfor %}
+
+{% if type == "ACCESS" -%}
+evpn
+ {% for vlan in access %}
+  vni {{vlan.vlanid|l2vnid}} l2
+    rd {{routerid}}:{{vlan.vlanid|l2vnid}}
+    route-target import {{bgpas}}:{{vlan.vlanid|l2vnid}}
+    route-target export {{bgpas}}:{{vlan.vlanid|l2vnid}}
+ {%- endfor %}
+{%- endif %}
+
+
+
+
+{% if type == "BORDER" -%}
+evpn
+ {% for vlan in borders %}
+  vni {{vlan.vlanid|l2vnid}} l2
+    rd {{routerid}}:{{vlan.vlanid|l2vnid}}
+    route-target import {{bgpas}}:{{vlan.vlanid|l2vnid}}
+    route-target export {{bgpas}}:{{vlan.vlanid|l2vnid}}
+{%- endfor %}
+{%- endif %}
+
+
+
+
+{% if vrfs -%}
+
+route-map RM-DIRECT-TO-BGP 
+route-map RM-STATIC-TO-BGP
+
+{% set staticsByVrf =  statics|byVrf  %}
+
+
+router bgp {{bgpas}}
+{% for vrf in vrfs %}
+ vrf {{vrf.name}}
+    address-family ipv4 unicast
+      maximum-paths ibgp 2
+      advertise l2vpn evpn  
+      {% if type == "ACCESS" -%}
+      redistribute direct route-map RM-DIRECT-TO-BGP
+      {%- endif %}
+      {%-if type == "BORDER" and 0 -%}
+	  default-information originate
+      redistribute static route-map RM-STATIC-to-BGP
+      {%- endif %}
+{%- endfor %}
+
+{%- endif %}
+
+
+{% if type == "BORDER" -%}
+{% for vrf in  staticsByVrf %} 
+vrf context {{vrf}}
+{%- for static in  staticsByVrf[vrf] %} 
+ ip route {{static.prefix}} {{static.gateway}} {%- if static.tag -%} tag {{static.tag}} {%- endif %}  {%- if static.description -%} name {{static.description}} {%- endif %}
+ 
+{%- endfor %} 
+{%- endfor %}
+{%- endif %}

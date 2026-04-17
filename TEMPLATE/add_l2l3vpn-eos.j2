@@ -1,0 +1,123 @@
+
+! {{hostname}}
+
+
+! {{type}}
+
+{% if type == "ACCESS" -%}
+{% for vlan in access %}
+vlan {{vlan.vlanid}}
+ {%- if vlan.description %} 
+ name {{vlan.description}}  
+ {%- endif %}
+{%- endfor %}
+{%- endif %}
+
+{% if type == "BORDER" -%}
+{% for vlan in borders %}
+vlan {{vlan.vlanid}}
+  {% if vlan.description %} name  {{vlan.description}}  {%- endif %}
+{%- endfor %}
+{%- endif %}
+
+{% for vrf in vrfs %} 
+vrf instance {{vrf.name}}
+ description {{vrf.name}}_L3VNI:{{vrf.vrfid|l3vnid}}
+{%- endfor %}
+
+
+
+{% if type == "ACCESS" -%}
+{% for svi in servers %}
+{%- if svi.vrf %}
+interface Vlan{{svi.vlanid}}
+ shut
+ arp gratuitous accept
+ mtu 9000
+{% if svi.description %} description {{svi.description}} {%- endif %}
+ vrf {{svi.vrf}}
+ ip address virtual {{svi.address}}
+
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+
+{% if type == "BORDER" -%}
+{% for svi in svis %}
+{%- if svi.vrf %}
+interface Vlan{{svi.vlanid}}
+ shut
+ arp gratuitous accept
+ mtu 9000
+{% if svi.description %} description {{svi.description}} {%- endif %}
+ vrf {{svi.vrf}}
+ ip address virtual {{svi.address}}
+ shut
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+
+
+interface Vxlan1
+{% if type == "ACCESS" -%}
+{% for vlan in access %}
+ vxlan vlan {{vlan.vlanid}} vni {{vlan.vlanid|l2vnid}} 
+{%- endfor %}
+{%- endif %}
+{% if type == "BORDER" -%}
+{% for vlan in borders %}
+ vxlan vlan {{vlan.vlanid}} vni {{vlan.vlanid|l2vnid}} 
+{%- endfor %}
+{%- endif %}
+{% for vrf in vrfs %} 
+ vxlan vrf {{vrf.name}} vni {{vrf.vrfid|l3vnid}}
+{%- endfor %}
+
+{% if type == "ACCESS" -%}
+router bgp {{bgpas}}
+ {% for vlan in access %}
+ vlan {{vlan.vlanid}}
+  rd {{routerid}}:{{vlan.vlanid|l2vnid}}
+  route-target import {{bgpas}}:{{vlan.vlanid|l2vnid}}
+  route-target export {{bgpas}}:{{vlan.vlanid|l2vnid}}
+  redistribute learned
+{%- endfor %}
+{% for vrf in vrfs %} 
+ vrf {{vrf.name}}
+    rd {{routerid}}:{{vrf.vrfid|l3vnid}}
+    route-target import evpn {{bgpas}}:{{vrf.vrfid|l3vnid}}
+    route-target export evpn {{bgpas}}:{{vrf.vrfid|l3vnid}}
+    redistribute connected
+    redistribute static
+{%- endfor %}
+{%- endif %}
+
+{% if type == "BORDER" -%}
+router bgp {{bgpas}}
+ {% for vlan in borders %}
+ vlan {{vlan.vlanid}}
+  rd {{routerid}}:{{vlan.vlanid|l2vnid}}
+  route-target import {{bgpas}}:{{vlan.vlanid|l2vnid}}
+  route-target export {{bgpas}}:{{vlan.vlanid|l2vnid}}
+  redistribute learned
+{%- endfor %}
+{% for vrf in vrfs %} 
+   vrf {{vrf.name}}
+      rd {{routerid}}:{{vrf.vrfid|l3vnid}}
+      route-target import evpn {{bgpas}}:{{vrf.vrfid|l3vnid}}
+      route-target export evpn {{bgpas}}:{{vrf.vrfid|l3vnid}}
+      redistribute connected
+      redistribute static
+{%- endfor %}
+{%- endif %}
+
+
+{% for vrf in vrfs %} 
+ip routing vrf {{vrf.name}}
+{%- endfor %}
+
+{% if type == "BORDER" -%}
+{% for static in statics %} 
+ip route vrf {{static.vrf}} {{static.prefix}} {{static.gateway}} {%- if static.tag -%} tag {{static.tag}} {%- endif %}  {%- if static.description -%} name {{static.description}} {%- endif %} 
+{%- endfor %}
+{%- endif %}

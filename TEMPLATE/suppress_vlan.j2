@@ -1,0 +1,16 @@
+! {{hostname}}
+
+
+
+{% for vlan in l3 %}
+no interface Vlan{{vlan}}
+!
+{%- endfor %}
+
+
+{% for vlan in l2 %}
+no vlan {{vlan}}
+!
+{%- endfor %}
+
+
